@@ -13,7 +13,6 @@ const Login = () => {
     const emailRef = useRef();
     const passwordRef = useRef();
     const notification = useSelector((state) => state.ui.notification);
-    const users = useSelector((state) => state.auth.users);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -25,48 +24,57 @@ const Login = () => {
                     dispatch(authActions.setUsers(res.data));
                 }
             } catch (error) {
-                console.error("Error fetching users:", error);
+                console.log( error);
             }
         };
         fetchUsers();
     }, [dispatch]);
 
-    const handleSubmit = (evt) => {
-        evt.preventDefault();
-        const email = emailRef.current.value;
-        const password = passwordRef.current.value;
-
-        const existingUser = users.find(
-            (user) => user.email === email && user.password === password
-        );
-
-        if (existingUser) {
+    const handleSubmit = async (evt) => {
+      evt.preventDefault();
+      const newUser = {
+          email: emailRef.current.value,
+          password: passwordRef.current.value,
+      };
+  
+      try {
+        dispatch(
+                      uiActions.showUi({
+                        type: 'warning',
+                        message: 'The request is sending...',
+                        open: true,
+                      })
+                    );
+          const res = await API.get("users.json");
+          const existingUsers = res.data ? res.data : []; 
+  
+          const updatedUsers = [...existingUsers, newUser];
+  
+          await API.put("users.json", updatedUsers);
+          
+          dispatch(authActions.setUsers(updatedUsers));
+          dispatch(authActions.registerUser(newUser));
+  
           dispatch(
-            uiActions.showUi({
-              type: 'warning',
-              message: 'The request is being sent...',
-              open: true,
-            })
-          );
-            dispatch(authActions.setUsers(existingUser));
-             dispatch(
-                          uiActions.showUi({
-                            type: 'success',
-                            message: 'The request was sent successfully!',
-                            open: true,
-                          })
-                        );
-            navigate("/private");
-        } else {
-             dispatch(
+                        uiActions.showUi({
+                          type: 'success',
+                          message: 'You have successfully logged in!',
+                          open: true,
+                        })
+                      );
+          navigate("/private");
+      } catch (error) {
+          dispatch(
                         uiActions.showUi({
                           type: 'error',
                           message: 'Invalid email or password!',
                           open: true,
                         })
                       );
-        }
-    };
+          console.error("Error updating users:", error);
+      }
+  };
+  
 
     return (
         <Container maxWidth="xs">

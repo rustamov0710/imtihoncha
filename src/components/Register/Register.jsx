@@ -14,8 +14,6 @@ const Register = () => {
     const passwordRef = useRef();
     const users = useSelector((state) => state.auth.users);
     const notification = useSelector((state) => state.ui.notification);
-    console.log(users);
-    
 
     const handleSubmit = async (evt) => {
         evt.preventDefault();
@@ -23,24 +21,24 @@ const Register = () => {
             email: emailRef.current.value,
             password: passwordRef.current.value,
         };
-        
-        dispatch(authActions.registerUser(newUser));
+
+        const updatedUsers = [...users, newUser]; 
+        dispatch(authActions.setUsers(updatedUsers)); 
+        dispatch(authActions.registerUser(newUser)); 
 
         try {
           dispatch(
             uiActions.showUi({
               type: 'warning',
-              message: 'The request is being sent...',
+              message: 'The request is sending...',
               open: true,
             })
           );
-
-            await API.put("users.json", users);
-            
+            await API.put("users.json", updatedUsers); 
             dispatch(
               uiActions.showUi({
                 type: 'success',
-                message: 'The request was sent successfully!',
+                message: 'You have successfully registered!',
                 open: true,
               })
             );
@@ -53,12 +51,11 @@ const Register = () => {
               open: true,
             })
           );
-            console.error("Error updating users:", error);
+            console.log(error);
         }
     };
 
     return (
-      
         <Container maxWidth="xs">
           {notification && notification.open && (
                   <Notification type={notification.type} message={notification.message} />
