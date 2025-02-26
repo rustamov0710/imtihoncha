@@ -17,14 +17,12 @@ const Login = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-              
-        
                 const res = await API.get("users.json");
                 if (res.data) {
                     dispatch(authActions.setUsers(res.data));
                 }
             } catch (error) {
-                console.log( error);
+                console.log(error);
             }
         };
         fetchUsers();
@@ -32,55 +30,62 @@ const Login = () => {
 
     const handleSubmit = async (evt) => {
       evt.preventDefault();
-      const newUser = {
-          email: emailRef.current.value,
-          password: passwordRef.current.value,
-      };
+      const email = emailRef.current.value;
+      const password = passwordRef.current.value;
   
       try {
-        dispatch(
-                      uiActions.showUi({
-                        type: 'warning',
-                        message: 'The request is sending...',
-                        open: true,
-                      })
-                    );
-          const res = await API.get("users.json");
-          const existingUsers = res.data ? res.data : []; 
-  
-          const updatedUsers = [...existingUsers, newUser];
-  
-          await API.put("users.json", updatedUsers);
-          
-          dispatch(authActions.setUsers(updatedUsers));
-          dispatch(authActions.registerUser(newUser));
-  
           dispatch(
-                        uiActions.showUi({
-                          type: 'success',
-                          message: 'You have successfully logged in!',
-                          open: true,
-                        })
-                      );
-          navigate("/private");
+              uiActions.showUi({
+                  type: "warning",
+                  message: "Checking credentials...",
+                  open: true,
+              })
+          );
+  
+          const res = await API.get("users.json");
+          const users = res.data || []; 
+          
+          const foundUser = users.find(user => user.email === email && user.password === password);
+  
+          if (foundUser) {
+              dispatch(authActions.login(foundUser));
+              dispatch(
+                  uiActions.showUi({
+                      type: "success",
+                      message: "Successfully logged in!",
+                      open: true,
+                  })
+              );
+              navigate("/private");
+          } else {
+              dispatch(
+                  uiActions.showUi({
+                      type: "error",
+                      message: "Invalid email or password!",
+                      open: true,
+                  })
+              );
+          }
       } catch (error) {
           dispatch(
-                        uiActions.showUi({
-                          type: 'error',
-                          message: 'Invalid email or password!',
-                          open: true,
-                        })
-                      );
-          console.error("Error updating users:", error);
+              uiActions.showUi({
+                  type: "error",
+                  message: "Something went wrong. Try again!",
+                  open: true,
+              })
+          );
+          console.error("Error checking login:", error);
       }
   };
+  
+  
   
 
     return (
         <Container maxWidth="xs">
-          {notification && notification.open && (
-                  <Notification type={notification.type} message={notification.message} />
-                )}
+            {notification && notification.open && (
+                <Notification type={notification.type} message={notification.message} />
+            )}
             <Box
                 sx={{
                     display: 'flex',

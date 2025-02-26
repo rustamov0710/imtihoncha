@@ -16,44 +16,52 @@ const Register = () => {
     const notification = useSelector((state) => state.ui.notification);
 
     const handleSubmit = async (evt) => {
-        evt.preventDefault();
-        const newUser = {
-            email: emailRef.current.value,
-            password: passwordRef.current.value,
-        };
-
-        const updatedUsers = [...users, newUser]; 
-        dispatch(authActions.setUsers(updatedUsers)); 
-        dispatch(authActions.registerUser(newUser)); 
-
-        try {
+      evt.preventDefault();
+      const newUser = {
+          email: emailRef.current.value,
+          password: passwordRef.current.value,
+      };
+  
+      try {
           dispatch(
-            uiActions.showUi({
-              type: 'warning',
-              message: 'The request is sending...',
-              open: true,
-            })
-          );
-            await API.put("users.json", updatedUsers); 
-            dispatch(
               uiActions.showUi({
-                type: 'success',
-                message: 'You have successfully registered!',
-                open: true,
+                  type: "warning",
+                  message: "The request is sending...",
+                  open: true,
               })
-            );
-            navigate("/private");
-        } catch (error) {
-          dispatch(
-            uiActions.showUi({
-              type: 'error',
-              message: 'Error sending the request!',
-              open: true,
-            })
           );
-            console.log(error);
-        }
-    };
+  
+          const res = await API.get("users.json");
+          const existingUsers = res.data ? res.data : [];
+  
+          const updatedUsers = [...existingUsers, newUser];
+  
+          await API.put("users.json", updatedUsers);
+  
+          dispatch(authActions.setUsers(updatedUsers));
+          dispatch(authActions.registerUser(newUser));
+  
+          dispatch(
+              uiActions.showUi({
+                  type: "success",
+                  message: "You have successfully registered!",
+                  open: true,
+              })
+          );
+  
+          navigate("/private");
+      } catch (error) {
+          dispatch(
+              uiActions.showUi({
+                  type: "error",
+                  message: "Error sending the request!",
+                  open: true,
+              })
+          );
+          console.log("Error registering user:", error);
+      }
+  };
+  
 
     return (
         <Container maxWidth="xs">
