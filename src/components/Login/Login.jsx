@@ -37,7 +37,7 @@ const Login = () => {
           dispatch(
               uiActions.showUi({
                   type: "warning",
-                  message: "Checking credentials...",
+                  message: "Checking details...",
                   open: true,
               })
           );
@@ -56,25 +56,16 @@ const Login = () => {
                       open: true,
                   })
               );
-              navigate("/private");
-          } else {
-              dispatch(
-                  uiActions.showUi({
-                      type: "error",
-                      message: "Invalid email or password!",
-                      open: true,
-                  })
-              );
-          }
+              navigate("/private");}
       } catch (error) {
-          dispatch(
-              uiActions.showUi({
-                  type: "error",
-                  message: "Something went wrong. Try again!",
-                  open: true,
-              })
-          );
-          console.error("Error checking login:", error);
+        dispatch(
+            uiActions.showUi({
+                type: "error",
+                message: "Invalid email or password!",
+                open: true,
+            })
+        );
+          console.log(error);
       }
   };
   

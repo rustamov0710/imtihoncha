@@ -58,7 +58,7 @@ const Register = () => {
                   open: true,
               })
           );
-          console.log("Error registering user:", error);
+          console.log( error);
       }
   };
   
